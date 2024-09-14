@@ -1,6 +1,7 @@
 package com.infernalsuite.aswm.api.events;
 
 import com.infernalsuite.aswm.api.world.SlimeWorld;
+import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +14,7 @@ public class LoadSlimeWorldEvent extends Event {
   private final SlimeWorld slimeWorld;
 
   public LoadSlimeWorldEvent(SlimeWorld slimeWorld) {
-    super(false);
+    super(!Bukkit.isPrimaryThread());
     this.slimeWorld = Objects.requireNonNull(slimeWorld, "slimeWorld cannot be null");
   }
 
