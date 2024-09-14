@@ -1,15 +1,10 @@
-# Advanced Slime Paper (ASWM) [![Build Status](https://ci.infernalsuite.com/app/rest/builds/buildType:(id:AdvancedSlimePaper_Build)/statusIcon)](https://ci.infernalsuite.com/viewType.html?buildTypeId=AdvancedSlimePaper_Build&guest=1)
-
+# Sparkly Slime Paper
 [<img src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0b5061df29d55a92d945_full_logo_blurple_RGB.svg" alt="" height="55" />](https://discord.gg/YevvsMa)
 
-Advanced Slime Paper is a fork of Paper implementing the Slime Region Format developed by Hypixel. Originally a plugin, this project has been converted to a
-fork to maximize our ability to provide fixes and performance improvements.
-Its goal is to provide server administrators with an easy-to-use tool to load worlds faster and save space.
+Sparkly Slime Paper is a fork of [ASWM](https://github.com/InfernalSuite/AdvancedSlimePaper) implementing the [Parallel World Ticking patch by SparklyPower](https://github.com/SparklyPower/SparklyPaper/blob/ver/1.21.1/docs/PARALLEL_WORLD_TICKING.md).
 
 ## Releases
-
-ASP releases can be found [here](https://github.com/InfernalSuite/AdvancedSlimePaper/releases). More recent
-releases can be found in the [Discord](https://discord.gg/YevvsMa) under the #new-builds channel.
+No releases are provided at the moment, but you can of course clone the project and build it.
 
 ## Wiki
 For API and usage info check out the docs at https://infernalsuite.com/
@@ -31,3 +26,4 @@ Thanks to:
 * [Grinderwolf](https://github.com/Grinderwolf) - The original creator.
 * [Glare](https://glaremasters.me) - Providing the original Maven repository.
 * [Minikloon](https://twitter.com/Minikloon) and all the [Hypixel](https://twitter.com/HypixelNetwork) team for developing the SRF.
+* [SparklyPaper](https://github.com/SparklyPower/SparklyPaper) - Providing the parallel world ticking patch
