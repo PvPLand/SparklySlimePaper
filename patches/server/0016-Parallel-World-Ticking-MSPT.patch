@@ -584,7 +584,7 @@ index cb308808906a8cdb127df8284e106e00553473ca..323d41e2bed5e83a26dfe4c88dfce7ed
              }
  
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 4434022a6235db9cb453596df7d2aef7bf011363..50bb0b3d0e1921dd1fe0711ba73566dc2a4f7a19 100644
+index 4434022a6235db9cb453596df7d2aef7bf011363..a507ef02e36fd977426635093dbe785867712cc2 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -323,6 +323,9 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
@@ -694,6 +694,14 @@ index 4434022a6235db9cb453596df7d2aef7bf011363..50bb0b3d0e1921dd1fe0711ba73566dc
          this.isIteratingOverLevels = false; // Paper - Throw exception on world create while being ticked
  
          this.profiler.popPush("connection");
+@@ -1924,6 +1949,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+         Map<ResourceKey<Level>, ServerLevel> oldLevels = this.levels;
+         Map<ResourceKey<Level>, ServerLevel> newLevels = Maps.newLinkedHashMap(oldLevels);
+         newLevels.remove(level.dimension());
++        level.tickExecutor.shutdown(); // SparklyPaper - parallel world ticking (We remove it in here instead of ServerLevel.close() because ServerLevel.close() is never called!)
+         this.levels = Collections.unmodifiableMap(newLevels);
+     }
+     // CraftBukkit end
 diff --git a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
 index dd56c8e041116ef3602a9f89c998c8208ab89b51..24b92447bc25c152668132078fbc2efeb1c50c09 100644
 --- a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
@@ -734,7 +742,7 @@ index 025a968d6081d13903396d087a582ff9033b0b7e..8aa679a9b1358a8a9b404767d858d6d6
                              // Paper end - rewrite chunk system
                          }
 diff --git a/src/main/java/net/minecraft/server/level/ServerLevel.java b/src/main/java/net/minecraft/server/level/ServerLevel.java
-index 5aae3c7692a6e4bc04b843878da063f6d2a5c7f2..76c29c5f3d2cfe34b6a0cbde24ebbaf85124dbd7 100644
+index 5aae3c7692a6e4bc04b843878da063f6d2a5c7f2..7ce53bcf66d5e450f9634adb5b3b7eed4ca29ad7 100644
 --- a/src/main/java/net/minecraft/server/level/ServerLevel.java
 +++ b/src/main/java/net/minecraft/server/level/ServerLevel.java
 @@ -1,5 +1,6 @@
@@ -830,14 +838,6 @@ index 5aae3c7692a6e4bc04b843878da063f6d2a5c7f2..76c29c5f3d2cfe34b6a0cbde24ebbaf8
          entity.generation = false; // Paper - Don't fire sync event during generation; Reset flag if it was added during a ServerLevel generation process
          // Paper start - extra debug info
          if (entity.valid) {
-@@ -2441,6 +2457,7 @@ public class ServerLevel extends Level implements WorldGenLevel, ca.spottedleaf.
-     public void close() throws IOException {
-         super.close();
-         // Paper - rewrite chunk system
-+        tickExecutor.shutdown(); // SparklyPaper - parallel world ticking
-     }
- 
-     @Override
 diff --git a/src/main/java/net/minecraft/server/level/ServerPlayer.java b/src/main/java/net/minecraft/server/level/ServerPlayer.java
 index 5980b70e2d7273239245237189b2debcbccfbac3..800561b034d98825b9fff6d12fc12674d8cf48bb 100644
 --- a/src/main/java/net/minecraft/server/level/ServerPlayer.java
