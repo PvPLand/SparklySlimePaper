@@ -6,7 +6,7 @@ Subject: [PATCH] Build Changes
 Change shadow plugin
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 421f6b3dc8890d63d2e7aa774d0bf8f7e15890ab..ef23b818c58015cd4be77962ea257d4cb4a2a7ac 100644
+index de0474b8dce58cb419c00b7614d7dd66be832a02..60fdf49ec827b1595983277a01fa3d471682e7c5 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
 @@ -4,6 +4,7 @@ import java.time.Instant
@@ -32,7 +32,7 @@ index 421f6b3dc8890d63d2e7aa774d0bf8f7e15890ab..ef23b818c58015cd4be77962ea257d4c
      // Paper start
      implementation("org.jline:jline-terminal-jansi:3.21.0")
      implementation("net.minecrell:terminalconsoleappender:1.3.0")
-@@ -84,14 +91,14 @@ tasks.jar {
+@@ -85,14 +92,14 @@ tasks.jar {
          val gitBranch = git("rev-parse", "--abbrev-ref", "HEAD").getText().trim() // Paper
          attributes(
              "Main-Class" to "org.bukkit.craftbukkit.Main",
@@ -52,7 +52,7 @@ index 421f6b3dc8890d63d2e7aa774d0bf8f7e15890ab..ef23b818c58015cd4be77962ea257d4c
              "Build-Number" to (build ?: ""),
              "Build-Time" to Instant.now().toString(),
              "Git-Branch" to gitBranch, // Paper
-@@ -148,7 +155,7 @@ fun TaskContainer.registerRunTask(
+@@ -153,7 +160,7 @@ fun TaskContainer.registerRunTask(
      name: String,
      block: JavaExec.() -> Unit
  ): TaskProvider<JavaExec> = register<JavaExec>(name) {
@@ -62,7 +62,7 @@ index 421f6b3dc8890d63d2e7aa774d0bf8f7e15890ab..ef23b818c58015cd4be77962ea257d4c
      standardInput = System.`in`
      workingDir = rootProject.layout.projectDirectory
 diff --git a/src/main/java/ca/spottedleaf/moonrise/patches/chunk_system/level/entity/ChunkEntitySlices.java b/src/main/java/ca/spottedleaf/moonrise/patches/chunk_system/level/entity/ChunkEntitySlices.java
-index 87d2b3ec165e2e9e4bdbedd7adddaa2130ed507b..286d63e017b8bfabbbecee0c4f994d9e5fbd072b 100644
+index 5c7f2471a0b15ac2e714527296ad2aa7291999eb..11c095f7c73d15903fc275d1975e98a7f79c4bc8 100644
 --- a/src/main/java/ca/spottedleaf/moonrise/patches/chunk_system/level/entity/ChunkEntitySlices.java
 +++ b/src/main/java/ca/spottedleaf/moonrise/patches/chunk_system/level/entity/ChunkEntitySlices.java
 @@ -40,7 +40,7 @@ public final class ChunkEntitySlices {
@@ -2073,7 +2073,7 @@ index 790bad0494454ca12ee152e3de6da3da634d9b20..2d6b062c4a3cf682d8e4cdbb7b7c84a7
  
      @Override
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 23ddd26af762c1cd7fb3920669abb96b3213ab37..4434022a6235db9cb453596df7d2aef7bf011363 100644
+index 696d075ca2883f3c37e35f983c4d020e5db89d16..ba81a045dc85900b96c6004d03cf9f145e7f3f0f 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -282,7 +282,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
@@ -2085,7 +2085,7 @@ index 23ddd26af762c1cd7fb3920669abb96b3213ab37..4434022a6235db9cb453596df7d2aef7
      private final CustomBossEvents customBossEvents;
      private final ServerFunctionManager functionManager;
      private boolean enforceWhitelist;
-@@ -546,51 +546,66 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -545,51 +545,66 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
              if (dimensionKey == LevelStem.NETHER) {
                  if (this.server.getAllowNether()) {
                      dimension = -1;
@@ -2165,7 +2165,7 @@ index 23ddd26af762c1cd7fb3920669abb96b3213ab37..4434022a6235db9cb453596df7d2aef7
                          MinecraftServer.LOGGER.warn("Could not create path for " + newWorld + "!");
                          MinecraftServer.LOGGER.info("---- Migration of old " + worldType + " folder failed ----");
                      }
-@@ -598,7 +613,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -597,7 +612,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
  
                  try {
                      worldSession = LevelStorageSource.createDefault(this.server.getWorldContainer().toPath()).validateAndCreateAccess(name, dimensionKey);
@@ -2192,7 +2192,7 @@ index dcb5651d1d9b10b40430fb2f713beedf68336704..025a968d6081d13903396d087a582ff9
          this.mainThreadProcessor = new ServerChunkCache.MainThreadExecutor(world);
          this.mainThread = Thread.currentThread();
 diff --git a/src/main/java/net/minecraft/server/level/ServerLevel.java b/src/main/java/net/minecraft/server/level/ServerLevel.java
-index 2fe9d9b38c01d04416843fdd48d3e33899b7de63..5aae3c7692a6e4bc04b843878da063f6d2a5c7f2 100644
+index f9abf63e12ea930275121b470e4e4906cff0fc12..703cc0d92903a5bcbc9708b7f8f9da1c1640ba0a 100644
 --- a/src/main/java/net/minecraft/server/level/ServerLevel.java
 +++ b/src/main/java/net/minecraft/server/level/ServerLevel.java
 @@ -499,6 +499,14 @@ public class ServerLevel extends Level implements WorldGenLevel, ca.spottedleaf.
