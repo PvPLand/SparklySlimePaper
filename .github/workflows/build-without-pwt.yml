@@ -37,5 +37,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         name: "Upload Mojang Mappings Paperclip JAR"
         with:
-          name: SparklyPaper (without Parallel World Ticking) Paperclip (Mojang Mappings - mojmap)
-          path: "build/libs/SparklyPaper-paperclip-*-mojmap.jar"
+          name: SparklySlimePaper (without Parallel World Ticking) Paperclip (Mojang Mappings - mojmap)
+          path: "build/libs/slimeworldmanager-paperclip-*-mojmap.jar"
