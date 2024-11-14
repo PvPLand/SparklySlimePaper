@@ -742,7 +742,7 @@ index 025a968d6081d13903396d087a582ff9033b0b7e..8aa679a9b1358a8a9b404767d858d6d6
                              // Paper end - rewrite chunk system
                          }
 diff --git a/src/main/java/net/minecraft/server/level/ServerLevel.java b/src/main/java/net/minecraft/server/level/ServerLevel.java
-index 703cc0d92903a5bcbc9708b7f8f9da1c1640ba0a..a8b0a374acffd4ab970e9fd2adf0451af6e44a68 100644
+index 703cc0d92903a5bcbc9708b7f8f9da1c1640ba0a..269b4bee31db8d1aa64d52151eab1f9f08aea629 100644
 --- a/src/main/java/net/minecraft/server/level/ServerLevel.java
 +++ b/src/main/java/net/minecraft/server/level/ServerLevel.java
 @@ -1,5 +1,6 @@
@@ -795,7 +795,7 @@ index 703cc0d92903a5bcbc9708b7f8f9da1c1640ba0a..a8b0a374acffd4ab970e9fd2adf0451a
          // Paper end - rewrite chunk system
          this.getCraftServer().addWorld(this.getWorld()); // CraftBukkit
 +        this.tickExecutor = java.util.concurrent.Executors.newSingleThreadExecutor(runnable -> {
-+            TickThread tickThread = new TickThread.ServerLevelTickThread(runnable, "serverlevel-tick-worker [$worldName]");
++            TickThread tickThread = new TickThread.ServerLevelTickThread(runnable, "serverlevel-tick-worker [" + this.getWorld().getName() + "]");
 +            tickThread.setDaemon(false);
 +            tickThread.setPriority(5);
 +            return tickThread;
