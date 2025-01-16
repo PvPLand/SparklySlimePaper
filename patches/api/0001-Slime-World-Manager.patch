@@ -14,14 +14,14 @@ index e7c96be769fde8375b9a1b128cc7ce474144d16d..1c14c8d33fbadd7908383dc11ceafdf8
  plugins {
      `java-library`
      `maven-publish`
-@@ -29,6 +31,7 @@ configurations.api {
- dependencies {
-     api("com.mojang:brigadier:1.2.9") // Paper - Brigadier command api
+@@ -43,6 +45,7 @@ dependencies {
      // api dependencies are listed transitively to API consumers
+     api("com.google.guava:guava:33.3.1-jre")
+     api("com.google.code.gson:gson:2.11.0")
 +    api(project(":api")) // ASWM
-     api("com.google.guava:guava:32.1.2-jre")
-     api("com.google.code.gson:gson:2.10.1")
      // Paper start - adventure
+     api("net.md-5:bungeecord-chat:$bungeeCordChatVersion-deprecated+build.19") {
+         exclude("com.google.guava", "guava")
 diff --git a/src/main/java/io/papermc/paper/ServerBuildInfo.java b/src/main/java/io/papermc/paper/ServerBuildInfo.java
 index 652ff54e7c50412503725d628bfe72ed03059790..9c5118e6193b0e9852ef6b52cb4ae92ded1ba464 100644
 --- a/src/main/java/io/papermc/paper/ServerBuildInfo.java

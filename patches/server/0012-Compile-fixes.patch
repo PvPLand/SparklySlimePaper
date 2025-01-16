@@ -5,10 +5,10 @@ Subject: [PATCH] Compile fixes
 
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index f947b82537e5858dd0020a7a6fff48c54f3b49a3..316d03791a97af50f882c0271cbacf3d2a7af5b3 100644
+index 87f5370b1d1d8eb5034515de50eb35811e24b5eb..777bbfa22a4e33bc706fa46e3dbf1b471f42be2a 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
-@@ -17,9 +17,6 @@ dependencies {
+@@ -29,9 +29,6 @@ dependencies {
      // ASWM start
      implementation(project(":slimeworldmanager-api"))
      implementation(project(":core"))
@@ -16,8 +16,8 @@ index f947b82537e5858dd0020a7a6fff48c54f3b49a3..316d03791a97af50f882c0271cbacf3d
 -        exclude("io.papermc.paper", "paper-api")
 -    }
      // ASWM end
+     implementation("ca.spottedleaf:concurrentutil:0.0.2") // Paper - Add ConcurrentUtil dependency
      // Paper start
-     implementation("org.jline:jline-terminal-jansi:3.21.0")
 diff --git a/src/main/java/com/infernalsuite/aswm/level/NMSSlimeChunk.java b/src/main/java/com/infernalsuite/aswm/level/NMSSlimeChunk.java
 index e183ca25bf67a0519de7a91615fbcfc6ff45a56e..b295d159200e3bf0e48f851ac206b2e09b756bb2 100644
 --- a/src/main/java/com/infernalsuite/aswm/level/NMSSlimeChunk.java
