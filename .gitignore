@@ -1,18 +1,18 @@
-*.iml
-*.ipr
-*.iws
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
+
+/run
+
+/forky-server/build.gradle.kts
+/forky-server/src/minecraft
+/paper-server
+/fork-server
+/forky-api/build.gradle.kts
+/paper-api
+/paper-api-generator
+/fork-api
+
 .idea/
-.classpath
-.project
-.settings/
-slimeworldmanager-test/
-.DS_Store/
-release.properties
-libs/
-.gradle/
-build/
-slimeworldmanager-api
-slimeworldmanager-server
-run
-*.hprof
-paper-api-generator

@@ -1,13 +1,16 @@
 pluginManagement {
     repositories {
-        mavenLocal()
         gradlePluginPortal()
+        mavenLocal()
         maven("https://repo.papermc.io/repository/maven-public/")
     }
 }
 
-rootProject.name = "slimeworldmanager"
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.9.0"
+}
 
-include("plugin", "core", "api", "importer")
-include("slimeworldmanager-api", "slimeworldmanager-server")
-include("loaders")
+rootProject.name = "sparklyslimepaper"
+
+include("sparklyslimepaper-api")
+include("sparklyslimepaper-server")
