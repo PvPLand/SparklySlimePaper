@@ -1,0 +1,18 @@
+--- a/aspaper-api/build.gradle.kts
++++ b/aspaper-api/build.gradle.kts
+@@ -38,8 +_,14 @@
+     }
+ }
+ 
++repositories {
++    maven {
++        url = uri("https://repo.infernalsuite.com/repository/maven-snapshots/")
++    }
++}
++
+ dependencies {
+-    api(project(":api")) //ASP
++    api("com.infernalsuite.asp:api:4.0.0-SNAPSHOT") //ASP
+     // api dependencies are listed transitively to API consumers
+     api("com.google.guava:guava:33.3.1-jre")
+     api("com.google.code.gson:gson:2.11.0")
