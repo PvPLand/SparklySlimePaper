@@ -31,6 +31,11 @@ paperweight {
             patchesDir = file("sparklyslimepaper-api/aspaper-patches")
             outputDir = file("aspaper-api")
         }
+        patchDir("sparklyslimepaper-asp-api") {
+            upstreamPath = "api"
+            patchesDir = file("sparklyslimepaper-api/aspaper-api-patches")
+            outputDir = file("sparklyslimepaper-asp-api")
+        }
     }
 }
 

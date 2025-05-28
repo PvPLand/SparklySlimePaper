@@ -14,3 +14,4 @@ rootProject.name = "sparklyslimepaper"
 
 include("sparklyslimepaper-api")
 include("sparklyslimepaper-server")
+include("sparklyslimepaper-asp-api")
