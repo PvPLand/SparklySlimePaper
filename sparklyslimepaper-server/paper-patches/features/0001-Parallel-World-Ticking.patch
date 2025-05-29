@@ -422,22 +422,10 @@ index bf5343b0847e9f57ffbc7f33714ae6ca62f14332..8cd9a8eb70ebb170a7e0e2f8daa47bd1
                  acceptsAll(asList("server-name"), "Name of the server")
                          .withRequiredArg()
 diff --git a/src/main/java/org/bukkit/craftbukkit/block/CraftBlock.java b/src/main/java/org/bukkit/craftbukkit/block/CraftBlock.java
-index 02e8a49d220ad99f7a5dc9786617f3759c3ca0d0..9243e2e1a2373212269714c67d6ef540e1553015 100644
+index 02e8a49d220ad99f7a5dc9786617f3759c3ca0d0..d9148c5da18b02019b33144fcd6e630653374bce 100644
 --- a/src/main/java/org/bukkit/craftbukkit/block/CraftBlock.java
 +++ b/src/main/java/org/bukkit/craftbukkit/block/CraftBlock.java
-@@ -75,6 +75,11 @@ public class CraftBlock implements Block {
-     }
- 
-     public net.minecraft.world.level.block.state.BlockState getNMS() {
-+        // Folia start - parallel world ticking
-+        if (world instanceof ServerLevel serverWorld) {
-+            ca.spottedleaf.moonrise.common.util.TickThread.ensureTickThread(serverWorld, position, "Cannot read world asynchronously");
-+        }
-+        // Folia end - parallel world ticking
-         return this.world.getBlockState(this.position);
-     }
- 
-@@ -157,6 +162,11 @@ public class CraftBlock implements Block {
+@@ -157,6 +157,11 @@ public class CraftBlock implements Block {
      }
  
      private void setData(final byte data, int flag) {
@@ -449,7 +437,7 @@ index 02e8a49d220ad99f7a5dc9786617f3759c3ca0d0..9243e2e1a2373212269714c67d6ef540
          this.world.setBlock(this.position, CraftMagicNumbers.getBlock(this.getType(), data), flag);
      }
  
-@@ -198,6 +208,12 @@ public class CraftBlock implements Block {
+@@ -198,6 +203,12 @@ public class CraftBlock implements Block {
      }
  
      public static boolean setTypeAndData(LevelAccessor world, BlockPos position, net.minecraft.world.level.block.state.BlockState old, net.minecraft.world.level.block.state.BlockState blockData, boolean applyPhysics) {
@@ -462,7 +450,7 @@ index 02e8a49d220ad99f7a5dc9786617f3759c3ca0d0..9243e2e1a2373212269714c67d6ef540
          // SPIGOT-611: need to do this to prevent glitchiness. Easier to handle this here (like /setblock) than to fix weirdness in tile entity cleanup
          if (old.hasBlockEntity() && blockData.getBlock() != old.getBlock()) { // SPIGOT-3725 remove old tile entity if block changes
              // SPIGOT-4612: faster - just clear tile
-@@ -343,18 +359,33 @@ public class CraftBlock implements Block {
+@@ -343,18 +354,33 @@ public class CraftBlock implements Block {
  
      @Override
      public Biome getBiome() {
@@ -496,7 +484,7 @@ index 02e8a49d220ad99f7a5dc9786617f3759c3ca0d0..9243e2e1a2373212269714c67d6ef540
          this.getWorld().setBiome(this.getX(), this.getY(), this.getZ(), bio);
      }
  
-@@ -402,6 +433,11 @@ public class CraftBlock implements Block {
+@@ -402,6 +428,11 @@ public class CraftBlock implements Block {
  
      @Override
      public boolean isBlockFaceIndirectlyPowered(BlockFace face) {
@@ -508,7 +496,7 @@ index 02e8a49d220ad99f7a5dc9786617f3759c3ca0d0..9243e2e1a2373212269714c67d6ef540
          int power = this.world.getMinecraftWorld().getSignal(this.position, CraftBlock.blockFaceToNotch(face));
  
          Block relative = this.getRelative(face);
-@@ -414,6 +450,11 @@ public class CraftBlock implements Block {
+@@ -414,6 +445,11 @@ public class CraftBlock implements Block {
  
      @Override
      public int getBlockPower(BlockFace face) {
@@ -520,7 +508,7 @@ index 02e8a49d220ad99f7a5dc9786617f3759c3ca0d0..9243e2e1a2373212269714c67d6ef540
          int power = 0;
          net.minecraft.world.level.Level world = this.world.getMinecraftWorld();
          int x = this.getX();
-@@ -484,6 +525,11 @@ public class CraftBlock implements Block {
+@@ -484,6 +520,11 @@ public class CraftBlock implements Block {
  
      @Override
      public boolean breakNaturally() {
@@ -532,7 +520,7 @@ index 02e8a49d220ad99f7a5dc9786617f3759c3ca0d0..9243e2e1a2373212269714c67d6ef540
          return this.breakNaturally(null);
      }
  
-@@ -543,6 +589,11 @@ public class CraftBlock implements Block {
+@@ -543,6 +584,11 @@ public class CraftBlock implements Block {
  
      @Override
      public boolean applyBoneMeal(BlockFace face) {
@@ -544,7 +532,7 @@ index 02e8a49d220ad99f7a5dc9786617f3759c3ca0d0..9243e2e1a2373212269714c67d6ef540
          Direction direction = CraftBlock.blockFaceToNotch(face);
          BlockFertilizeEvent event = null;
          ServerLevel world = this.getCraftWorld().getHandle();
-@@ -554,8 +605,8 @@ public class CraftBlock implements Block {
+@@ -554,8 +600,8 @@ public class CraftBlock implements Block {
          world.captureTreeGeneration = false;
  
          if (world.capturedBlockStates.size() > 0) {
@@ -555,7 +543,7 @@ index 02e8a49d220ad99f7a5dc9786617f3759c3ca0d0..9243e2e1a2373212269714c67d6ef540
              List<BlockState> blocks = new ArrayList<>(world.capturedBlockStates.values());
              world.capturedBlockStates.clear();
              StructureGrowEvent structureEvent = null;
-@@ -644,6 +695,11 @@ public class CraftBlock implements Block {
+@@ -644,6 +690,11 @@ public class CraftBlock implements Block {
  
      @Override
      public RayTraceResult rayTrace(Location start, Vector direction, double maxDistance, FluidCollisionMode fluidCollisionMode) {
@@ -567,7 +555,7 @@ index 02e8a49d220ad99f7a5dc9786617f3759c3ca0d0..9243e2e1a2373212269714c67d6ef540
          Preconditions.checkArgument(start != null, "Location start cannot be null");
          Preconditions.checkArgument(this.getWorld().equals(start.getWorld()), "Location start cannot be a different world");
          start.checkFinite();
-@@ -685,6 +741,11 @@ public class CraftBlock implements Block {
+@@ -685,6 +736,11 @@ public class CraftBlock implements Block {
  
      @Override
      public boolean canPlace(BlockData data) {
@@ -579,7 +567,7 @@ index 02e8a49d220ad99f7a5dc9786617f3759c3ca0d0..9243e2e1a2373212269714c67d6ef540
          Preconditions.checkArgument(data != null, "BlockData cannot be null");
          net.minecraft.world.level.block.state.BlockState iblockdata = ((CraftBlockData) data).getState();
          net.minecraft.world.level.Level world = this.world.getMinecraftWorld();
-@@ -719,6 +780,11 @@ public class CraftBlock implements Block {
+@@ -719,6 +775,11 @@ public class CraftBlock implements Block {
  
      @Override
      public void tick() {
