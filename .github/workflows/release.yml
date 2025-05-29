@@ -41,7 +41,7 @@ jobs:
           prerelease: false
           title: "Development Build"
           files: |
-            sparklyslimepaper-server/build/libs/*.jar
+            sparklyslimepaper-server/build/libs/*-mojmap.jar
 
       - name: Create Release (master)
         if: github.ref == 'refs/heads/master'
@@ -52,4 +52,4 @@ jobs:
           prerelease: false
           title: "Production Build"
           files: |
-            sparklyslimepaper-server/build/libs/*.jar
+            sparklyslimepaper-server/build/libs/*-mojmap.jar
