@@ -1,0 +1,76 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Jaden <madcapsnow25@gmail.com>
+Date: Thu, 29 May 2025 02:17:01 -0500
+Subject: [PATCH] Use more accurate sprint state
+
+
+diff --git a/net/minecraft/world/entity/LivingEntity.java b/net/minecraft/world/entity/LivingEntity.java
+index 4546aca8e2e144ec207653c713fc49f849908827..0c5d1ccb784227171da8fc7384e2cfcacf2c9c29 100644
+--- a/net/minecraft/world/entity/LivingEntity.java
++++ b/net/minecraft/world/entity/LivingEntity.java
+@@ -2735,9 +2735,15 @@ public abstract class LivingEntity extends Entity implements Attackable {
+         return i > 0 ? (float)i1 / i : 0.0F;
+     }
+ 
++    @Override
++    public boolean isSprinting() {
++        return this.isAttackKnockbackIncreased();
++    }
++
+     @Override
+     public void setSprinting(boolean sprinting) {
+         super.setSprinting(sprinting);
++        this.setAttackKnockbackIncreased(sprinting); // Hydrogen - fix sprinting state on attack
+         AttributeInstance attribute = this.getAttribute(Attributes.MOVEMENT_SPEED);
+         attribute.removeModifier(SPEED_MODIFIER_SPRINTING.id());
+         if (sprinting) {
+@@ -2745,6 +2751,18 @@ public abstract class LivingEntity extends Entity implements Attackable {
+         }
+     }
+ 
++    // SparklySlimePaper start - fix sprinting state on attack
++    private boolean attackKnockbackIncreased;
++
++    public boolean isAttackKnockbackIncreased() {
++        return this.attackKnockbackIncreased;
++    }
++
++    public void setAttackKnockbackIncreased(boolean flag) {
++        this.attackKnockbackIncreased = flag;
++    }
++    // SparklySlimePaper end
++
+     public float getSoundVolume() {
+         return 1.0F;
+     }
+diff --git a/net/minecraft/world/entity/player/Player.java b/net/minecraft/world/entity/player/Player.java
+index a0813aa9ebf5b32375b1bc9f294d8fc34cc867fe..0fcd344b0dde3c49ca7a8a496d72a1768f2644c2 100644
+--- a/net/minecraft/world/entity/player/Player.java
++++ b/net/minecraft/world/entity/player/Player.java
+@@ -1248,12 +1248,11 @@ public abstract class Player extends LivingEntity {
+                     // CraftBukkit end
+                     if (f > 0.0F || f1 > 0.0F) {
+                         boolean flag = attackStrengthScale > 0.9F;
+-                        boolean flag1;
+-                        if (this.isSprinting() && flag) {
+-                            this.sendSoundEffect(this, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, this.getSoundSource(), 1.0F, 1.0F); // Paper - send while respecting visibility
+-                            flag1 = true;
+-                        } else {
+-                            flag1 = false;
++                        boolean flag1 = this.level().paperConfig().misc.disableSprintInterruptionOnAttack
++                                ? this.isAttackKnockbackIncreased() && flag
++                                : this.isSprinting() && flag;
++                        if (flag1) {
++                            this.sendSoundEffect(this, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, this.getSoundSource(), 1.0F, 1.0F);
+                         }
+ 
+                         f += weaponItem.getItem().getAttackDamageBonus(target, f, damageSource);
+@@ -1310,6 +1309,8 @@ public abstract class Player extends LivingEntity {
+                                 // Paper start - Configurable sprint interruption on attack
+                                 if (!this.level().paperConfig().misc.disableSprintInterruptionOnAttack) {
+                                 this.setSprinting(false);
++                                } else {
++                                    this.setAttackKnockbackIncreased(false);
+                                 }
+                                 // Paper end - Configurable sprint interruption on attack
+                             }
