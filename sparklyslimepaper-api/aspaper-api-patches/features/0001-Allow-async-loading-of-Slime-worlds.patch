@@ -1,0 +1,27 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Jaden <madcapsnow25@gmail.com>
+Date: Thu, 29 May 2025 02:26:49 -0500
+Subject: [PATCH] Allow async loading of Slime worlds
+
+
+diff --git a/src/main/java/com/infernalsuite/asp/api/events/LoadSlimeWorldEvent.java b/src/main/java/com/infernalsuite/asp/api/events/LoadSlimeWorldEvent.java
+index 64690b9c1a992f261e5ce6f4d9a27030b174f694..d37379dfc360f31899589ff3f4887d55304fdd5a 100644
+--- a/src/main/java/com/infernalsuite/asp/api/events/LoadSlimeWorldEvent.java
++++ b/src/main/java/com/infernalsuite/asp/api/events/LoadSlimeWorldEvent.java
+@@ -1,6 +1,7 @@
+ package com.infernalsuite.asp.api.events;
+ 
+ import com.infernalsuite.asp.api.world.SlimeWorldInstance;
++import org.bukkit.Bukkit;
+ import org.bukkit.event.Event;
+ import org.bukkit.event.HandlerList;
+ import org.jetbrains.annotations.NotNull;
+@@ -13,7 +14,7 @@ public class LoadSlimeWorldEvent extends Event {
+   private final SlimeWorldInstance slimeWorld;
+ 
+   public LoadSlimeWorldEvent(SlimeWorldInstance slimeWorld) {
+-    super(false);
++    super(!Bukkit.isPrimaryThread());
+     this.slimeWorld = Objects.requireNonNull(slimeWorld, "slimeWorld cannot be null");
+   }
+ 
