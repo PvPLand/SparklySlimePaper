@@ -1,0 +1,78 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Jaden <madcapsnow25@gmail.com>
+Date: Wed, 28 May 2025 04:38:02 -0500
+Subject: [PATCH] Branding Changes
+
+
+diff --git a/src/main/java/com/destroystokyo/paper/PaperVersionFetcher.java b/src/main/java/com/destroystokyo/paper/PaperVersionFetcher.java
+index eec04fcdd4b6c6f92a2db37bfe06dca2a93e300d..a9e948f2737d936500dd087c20bce398b8bac040 100644
+--- a/src/main/java/com/destroystokyo/paper/PaperVersionFetcher.java
++++ b/src/main/java/com/destroystokyo/paper/PaperVersionFetcher.java
+@@ -35,7 +35,6 @@ public class PaperVersionFetcher implements VersionFetcher {
+     private static final Logger LOGGER = LogUtils.getClassLogger();
+     private static final int DISTANCE_ERROR = -1;
+     private static final int DISTANCE_UNKNOWN = -2;
+-    private static final String DOWNLOAD_PAGE = "https://discord.gg/YevvsMa";
+ 
+     @Override
+     public long getCacheTime() {
+@@ -49,7 +48,7 @@ public class PaperVersionFetcher implements VersionFetcher {
+         if (build.buildNumber().isEmpty() && build.gitCommit().isEmpty()) {
+             updateMessage = text("You are running a development version without access to version information", color(0xFF5300));
+         } else {
+-            updateMessage = getUpdateStatusMessage("InfernalSuite/AdvancedSlimePaper", build);
++            updateMessage = getUpdateStatusMessage("PvPLand/SparklySlimePaper", build);
+         }
+         final @Nullable Component history = this.getHistory();
+ 
+@@ -74,12 +73,7 @@ public class PaperVersionFetcher implements VersionFetcher {
+             case DISTANCE_ERROR -> text("Error obtaining version information", NamedTextColor.YELLOW);
+             case 0 -> text("You are running the latest version", NamedTextColor.GREEN);
+             case DISTANCE_UNKNOWN -> text("Unknown version", NamedTextColor.YELLOW);
+-            default -> text("You are " + distance + " version(s) behind", NamedTextColor.YELLOW)
+-                .append(Component.newline())
+-                .append(text("Download the new version from our Discord: ")
+-                    .append(text(DOWNLOAD_PAGE, NamedTextColor.GOLD)
+-                        .hoverEvent(text("Click to open", NamedTextColor.WHITE))
+-                        .clickEvent(ClickEvent.openUrl(DOWNLOAD_PAGE))));
++            default -> text("You are " + distance + " version(s) behind", NamedTextColor.YELLOW);
+         };
+     }
+ 
+diff --git a/src/main/java/io/papermc/paper/ServerBuildInfoImpl.java b/src/main/java/io/papermc/paper/ServerBuildInfoImpl.java
+index d047646990ff52b31a24bdebf000ecfbebdae99a..dd5975d721baa525e43cd64309673b6a524a6ac9 100644
+--- a/src/main/java/io/papermc/paper/ServerBuildInfoImpl.java
++++ b/src/main/java/io/papermc/paper/ServerBuildInfoImpl.java
+@@ -32,6 +32,7 @@ public record ServerBuildInfoImpl(
+ 
+     private static final String BRAND_PAPER_NAME = "Paper";
+     private static final String BRAND_ADVANCED_SLIME_PAPER_NAME = "AdvancedSlimePaper";
++    private static final String BRAND_SPARKLY_SLIME_PAPER_NAME = "SparklySlimePaper";
+ 
+     private static final String BUILD_DEV = "DEV";
+ 
+@@ -62,7 +63,10 @@ public record ServerBuildInfoImpl(
+ 
+     @Override
+     public boolean isBrandCompatible(final @NotNull Key brandId) {
+-        return brandId.equals(this.brandId) || brandId.equals(BRAND_PAPER_ID) || brandId.equals(BRAND_ADVANCED_SLIME_PAPER_ID);
++        return brandId.equals(this.brandId)
++                || brandId.equals(BRAND_PAPER_ID)
++                || brandId.equals(BRAND_ADVANCED_SLIME_PAPER_ID)
++                || brandId.equals(BRAND_SPARKLY_SLIME_PAPER_ID);
+     }
+ 
+     @Override
+diff --git a/src/main/java/org/bukkit/craftbukkit/util/Versioning.java b/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
+index 0c54eb1187c31a2e6efd4b0898fc600fa1bddeee..dc82e7ed0b2495ce51cead129495b88c6a85aa8d 100644
+--- a/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
++++ b/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
+@@ -11,7 +11,7 @@ public final class Versioning {
+     public static String getBukkitVersion() {
+         String result = "Unknown-Version";
+ 
+-        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/com.infernalsuite.asp/aspaper-api/pom.properties");
++        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/land.pvp/sparklyslimepaper-api/pom.properties");
+         Properties properties = new Properties();
+ 
+         if (stream != null) {

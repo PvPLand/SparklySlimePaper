@@ -1,53 +1,69 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
 plugins {
-    java
-    `maven-publish`
-    id("com.gradleup.shadow") version "8.3.5" apply false
-    id("io.papermc.paperweight.patcher") version "1.7.7"
-    id("org.kordamp.gradle.profiles") version "0.54.0"
+    id("io.papermc.paperweight.patcher") version "2.0.0-beta.14"
+}
+
+paperweight {
+    upstreams.register("aspaper") {
+        repo = github("InfernalSuite", "AdvancedSlimePaper")
+        ref = providers.gradleProperty("aspaperRef")
+
+        patchFile {
+            path = "aspaper-server/build.gradle.kts"
+            outputFile = file("sparklyslimepaper-server/build.gradle.kts")
+            patchFile = file("sparklyslimepaper-server/build.gradle.kts.patch")
+        }
+        patchFile {
+            path = "aspaper-api/build.gradle.kts"
+            outputFile = file("sparklyslimepaper-api/build.gradle.kts")
+            patchFile = file("sparklyslimepaper-api/build.gradle.kts.patch")
+        }
+        patchRepo("paperApi") {
+            upstreamPath = "paper-api"
+            patchesDir = file("sparklyslimepaper-api/paper-patches")
+            outputDir = file("paper-api")
+        }
+        patchDir("aspaperApi") {
+            upstreamPath = "aspaper-api"
+            excludes = listOf("build.gradle.kts", "build.gradle.kts.patch", "paper-patches")
+            patchesDir = file("sparklyslimepaper-api/aspaper-patches")
+            outputDir = file("aspaper-api")
+        }
+        patchDir("sparklyslimepaper-asp-api") {
+            upstreamPath = "api"
+            patchesDir = file("sparklyslimepaper-api/aspaper-api-patches")
+            outputDir = file("sparklyslimepaper-asp-api")
+        }
+    }
 }
 
 val paperMavenPublicUrl = "https://repo.papermc.io/repository/maven-public/"
 
-repositories {
-    mavenCentral()
-    maven(paperMavenPublicUrl) {
-        content { onlyForConfigurations(configurations.paperclip.name) }
-    }
-}
-
-allprojects {
-    apply(plugin = "java")
+subprojects {
+    apply(plugin = "java-library")
     apply(plugin = "maven-publish")
 
-    java {
+    extensions.configure<JavaPluginExtension> {
         toolchain {
-            languageVersion.set(JavaLanguageVersion.of(21))
+            languageVersion = JavaLanguageVersion.of(21)
         }
     }
 
     repositories {
-        mavenLocal()
         mavenCentral()
-
-        maven("https://repo.papermc.io/repository/maven-public/")
-        maven("https://repo.codemc.io/repository/nms/")
-        maven("https://repo.rapture.pw/repository/maven-releases/")
-        maven("https://repo.glaremasters.me/repository/concuncan/")
-        maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-        maven("https://oss.sonatype.org/content/repositories/snapshots/")
+        maven(paperMavenPublicUrl)
     }
-}
 
-dependencies {
-    remapper("net.fabricmc:tiny-remapper:0.10.3:fat")
-    decompiler("org.vineflower:vineflower:1.10.1")
-    paperclip("io.papermc:paperclip:3.0.3")
-}
-
-subprojects {
+    tasks.withType<AbstractArchiveTask>().configureEach {
+        isPreserveFileTimestamps = false
+        isReproducibleFileOrder = true
+    }
     tasks.withType<JavaCompile> {
         options.encoding = Charsets.UTF_8.name()
-        options.release.set(21)
+        options.release = 21
+        options.isFork = true
     }
     tasks.withType<Javadoc> {
         options.encoding = Charsets.UTF_8.name()
@@ -55,35 +71,22 @@ subprojects {
     tasks.withType<ProcessResources> {
         filteringCharset = Charsets.UTF_8.name()
     }
-
-    repositories {
-        mavenCentral()
-        maven(paperMavenPublicUrl)
+    tasks.withType<Test> {
+        testLogging {
+            showStackTraces = true
+            exceptionFormat = TestExceptionFormat.FULL
+            events(TestLogEvent.STANDARD_OUT)
+        }
     }
-}
 
-paperweight {
-    serverProject.set(project(":slimeworldmanager-server"))
-
-    remapRepo.set(paperMavenPublicUrl)
-    decompileRepo.set(paperMavenPublicUrl)
-
-    usePaperUpstream(providers.gradleProperty("paperRef")) {
-        withPaperPatcher {
-            apiPatchDir.set(layout.projectDirectory.dir("patches/api"))
-            apiOutputDir.set(layout.projectDirectory.dir("slimeworldmanager-api"))
-
-            serverPatchDir.set(layout.projectDirectory.dir("patches/server"))
-            serverOutputDir.set(layout.projectDirectory.dir("slimeworldmanager-server"))
-
-            patchTasks {
-                register("generatedApi") {
-                    isBareDirectory.set(true)
-                    upstreamDirPath.set("paper-api-generator/generated")
-                    patchDir.set(layout.projectDirectory.dir("patches/generatedApi"))
-                    outputDir.set(layout.projectDirectory.dir("paper-api-generator/generated"))
-                }
+    extensions.configure<PublishingExtension> {
+        repositories {
+            /*
+            maven("https://repo.papermc.io/repository/maven-snapshots/") {
+                name = "paperSnapshots"
+                credentials(PasswordCredentials::class)
             }
+             */
         }
     }
 }

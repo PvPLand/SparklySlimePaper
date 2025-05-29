@@ -1,15 +1,14 @@
 # Sparkly Slime Paper
 [<img src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0b5061df29d55a92d945_full_logo_blurple_RGB.svg" alt="" height="55" />](https://discord.gg/YevvsMa)
 
-Sparkly Slime Paper is a fork of [ASWM](https://github.com/InfernalSuite/AdvancedSlimePaper) implementing the [Parallel World Ticking patch by SparklyPower](https://github.com/SparklyPower/SparklyPaper/blob/ver/1.21.1/docs/PARALLEL_WORLD_TICKING.md).
+Sparkly Slime Paper is a fork of [ASP](https://github.com/InfernalSuite/AdvancedSlimePaper) implementing the [Parallel World Ticking patch by SparklyPower](https://github.com/SparklyPower/SparklyPaper/blob/ver/1.21.1/docs/PARALLEL_WORLD_TICKING.md).
 
 ## Releases
-No releases are provided at the moment, but you can of course clone the project and build it.
+Development and production releases are available [here](https://github.com/PvPLand/SparklySlimePaper/releases).
+You can also clone the project and build it yourself.
 
 ## Wiki
 For API and usage info check out the docs at https://infernalsuite.com/
-
-**If you run into any Flow-NBT errors when building your project, add the additional repository: `https://repo.rapture.pw/repository/maven-releases/`**
 
 ## Javadocs
 The Javadocs can be found [here](https://docs.infernalsuite.com/).

@@ -1,0 +1,22 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Jaden <madcapsnow25@gmail.com>
+Date: Wed, 28 May 2025 04:38:17 -0500
+Subject: [PATCH] Branding Changes
+
+
+diff --git a/src/main/java/io/papermc/paper/ServerBuildInfo.java b/src/main/java/io/papermc/paper/ServerBuildInfo.java
+index d26bbab5b67b6456a2713e67c2bcfa17e7478992..461667b0983bf8fc7ed6bdb8cb496d0c3b656999 100644
+--- a/src/main/java/io/papermc/paper/ServerBuildInfo.java
++++ b/src/main/java/io/papermc/paper/ServerBuildInfo.java
+@@ -25,6 +25,11 @@ public interface ServerBuildInfo {
+      */
+     Key BRAND_ADVANCED_SLIME_PAPER_ID = Key.key("infernalsuite", "advancedslimepaper");
+ 
++    /**
++     * The brand id for SparklySlimePaper.
++     */
++    Key BRAND_SPARKLY_SLIME_PAPER_ID = Key.key("pvpland", "sparklyslimepaper");
++
+     /**
+      * Gets the {@code ServerBuildInfo}.
+      *
