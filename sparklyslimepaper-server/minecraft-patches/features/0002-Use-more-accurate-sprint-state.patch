@@ -5,18 +5,10 @@ Subject: [PATCH] Use more accurate sprint state
 
 
 diff --git a/net/minecraft/world/entity/LivingEntity.java b/net/minecraft/world/entity/LivingEntity.java
-index 4546aca8e2e144ec207653c713fc49f849908827..0c5d1ccb784227171da8fc7384e2cfcacf2c9c29 100644
+index 4546aca8e2e144ec207653c713fc49f849908827..9ffec2bd0dde0d0eb7c59d28a3394b735c61ed3a 100644
 --- a/net/minecraft/world/entity/LivingEntity.java
 +++ b/net/minecraft/world/entity/LivingEntity.java
-@@ -2735,9 +2735,15 @@ public abstract class LivingEntity extends Entity implements Attackable {
-         return i > 0 ? (float)i1 / i : 0.0F;
-     }
- 
-+    @Override
-+    public boolean isSprinting() {
-+        return this.isAttackKnockbackIncreased();
-+    }
-+
+@@ -2738,6 +2738,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
      @Override
      public void setSprinting(boolean sprinting) {
          super.setSprinting(sprinting);
@@ -24,7 +16,7 @@ index 4546aca8e2e144ec207653c713fc49f849908827..0c5d1ccb784227171da8fc7384e2cfca
          AttributeInstance attribute = this.getAttribute(Attributes.MOVEMENT_SPEED);
          attribute.removeModifier(SPEED_MODIFIER_SPRINTING.id());
          if (sprinting) {
-@@ -2745,6 +2751,18 @@ public abstract class LivingEntity extends Entity implements Attackable {
+@@ -2745,6 +2746,18 @@ public abstract class LivingEntity extends Entity implements Attackable {
          }
      }
  
