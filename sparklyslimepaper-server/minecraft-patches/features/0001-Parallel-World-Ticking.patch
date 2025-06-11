@@ -259,7 +259,7 @@ index 5ab2c8333178335515e619b87ae420f948c83bd1..c98e3748ff467f75f0a0e5a429563fea
              }
  
 diff --git a/net/minecraft/server/MinecraftServer.java b/net/minecraft/server/MinecraftServer.java
-index bbc4be3c3811ee19bd791cb6626474038d35a298..4301d6c4d9859ac21735d042cf31d87877fa442c 100644
+index bbc4be3c3811ee19bd791cb6626474038d35a298..aa74f5f033f5c7d913a02677de49feddc6bfb1d5 100644
 --- a/net/minecraft/server/MinecraftServer.java
 +++ b/net/minecraft/server/MinecraftServer.java
 @@ -303,6 +303,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
@@ -280,7 +280,7 @@ index bbc4be3c3811ee19bd791cb6626474038d35a298..4301d6c4d9859ac21735d042cf31d878
          for (ServerLevel serverLevel : this.getAllLevels()) {
              serverLevel.hasPhysicsEvent = org.bukkit.event.block.BlockPhysicsEvent.getHandlerList().getRegisteredListeners().length > 0; // Paper - BlockPhysicsEvent
              serverLevel.hasEntityMoveEvent = io.papermc.paper.event.entity.EntityMoveEvent.getHandlerList().getRegisteredListeners().length > 0; // Paper - Add EntityMoveEvent
-@@ -1735,18 +1739,46 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -1735,18 +1739,43 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
  
              profilerFiller.push("tick");
  
@@ -291,7 +291,6 @@ index bbc4be3c3811ee19bd791cb6626474038d35a298..4301d6c4d9859ac21735d042cf31d878
 -                serverLevel.fillReportDetails(crashReport);
 -                throw new ReportedException(crashReport);
 -            }
-+            serverLevelTickingSemaphore.acquire();
 +            tasks.add(
 +                serverLevel.tickExecutor.submit(() -> {
 +                    try {
@@ -313,8 +312,6 @@ index bbc4be3c3811ee19bd791cb6626474038d35a298..4301d6c4d9859ac21735d042cf31d878
 +
 +                        serverLevel.fillReportDetails(crashreport);
 +                        throw new ReportedException(crashreport);
-+                    } finally {
-+                        serverLevelTickingSemaphore.release();
 +                    }
 +                }, serverLevel)
 +            );
@@ -334,7 +331,7 @@ index bbc4be3c3811ee19bd791cb6626474038d35a298..4301d6c4d9859ac21735d042cf31d878
          this.isIteratingOverLevels = false; // Paper - Throw exception on world create while being ticked
  
          profilerFiller.popPush("connection");
-@@ -1837,6 +1869,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -1837,6 +1866,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
          Map<ResourceKey<Level>, ServerLevel> oldLevels = this.levels;
          Map<ResourceKey<Level>, ServerLevel> newLevels = Maps.newLinkedHashMap(oldLevels);
          newLevels.remove(level.dimension());
