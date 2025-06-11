@@ -282,10 +282,10 @@ index 69cdd304d255d52c9b7dc9b6a33ffdb630b79abe..d8314bae08146f75442c342275d2e94b
 +    // SparklyPaper end
  }
 diff --git a/src/main/java/io/papermc/paper/command/MSPTCommand.java b/src/main/java/io/papermc/paper/command/MSPTCommand.java
-index 8b5293b0c696ef21d0101493ffa41b60bf0bc86b..601198a33adb29316b0617d5390d1620b7c1095c 100644
+index 8b5293b0c696ef21d0101493ffa41b60bf0bc86b..6ba713606dafbf5ec19d22b10170571e4b2df47c 100644
 --- a/src/main/java/io/papermc/paper/command/MSPTCommand.java
 +++ b/src/main/java/io/papermc/paper/command/MSPTCommand.java
-@@ -78,6 +78,46 @@ public final class MSPTCommand extends Command {
+@@ -78,6 +78,49 @@ public final class MSPTCommand extends Command {
                  )
              )
          );
@@ -312,7 +312,10 @@ index 8b5293b0c696ef21d0101493ffa41b60bf0bc86b..601198a33adb29316b0617d5390d1620
 +                text(":", YELLOW)
 +            )
 +        );
-+        for (net.minecraft.server.level.ServerLevel serverLevel : server.getAllLevels()) {
++        List<net.minecraft.server.level.ServerLevel> sortedLevels = new ArrayList<>();
++        server.getAllLevels().forEach(sortedLevels::add);
++        sortedLevels.sort(java.util.Comparator.comparing(lvl -> lvl.getWorld().getName()));
++        for (net.minecraft.server.level.ServerLevel serverLevel : sortedLevels) {
 +            List<Component> worldTimes = new ArrayList<>();
 +            worldTimes.addAll(eval(serverLevel.tickTimes5s.getTimes()));
 +            worldTimes.addAll(eval(serverLevel.tickTimes10s.getTimes()));
