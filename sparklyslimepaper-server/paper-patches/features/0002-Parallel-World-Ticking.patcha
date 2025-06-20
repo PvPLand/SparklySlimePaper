@@ -5,10 +5,17 @@ Subject: [PATCH] Parallel World Ticking
 
 
 diff --git a/src/main/java/ca/spottedleaf/moonrise/common/util/TickThread.java b/src/main/java/ca/spottedleaf/moonrise/common/util/TickThread.java
-index 69cdd304d255d52c9b7dc9b6a33ffdb630b79abe..d8314bae08146f75442c342275d2e94b316829bd 100644
+index 69cdd304d255d52c9b7dc9b6a33ffdb630b79abe..64a1161cfec65a9a0d005e596e0ab51792c50602 100644
 --- a/src/main/java/ca/spottedleaf/moonrise/common/util/TickThread.java
 +++ b/src/main/java/ca/spottedleaf/moonrise/common/util/TickThread.java
-@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
+@@ -9,16 +9,21 @@ import net.minecraft.world.phys.Vec3;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+ 
++import java.util.Map;
++import java.util.concurrent.ConcurrentHashMap;
+ import java.util.concurrent.atomic.AtomicInteger;
+ 
  public class TickThread extends Thread {
  
      private static final Logger LOGGER = LoggerFactory.getLogger(TickThread.class);
@@ -16,7 +23,14 @@ index 69cdd304d255d52c9b7dc9b6a33ffdb630b79abe..d8314bae08146f75442c342275d2e94b
  
      private static String getThreadContext() {
          return "thread=" + Thread.currentThread().getName();
-@@ -26,14 +27,15 @@ public class TickThread extends Thread {
+     }
+ 
++    public static Map<Level, Thread> MAPPED_THREADS = new ConcurrentHashMap<>();
++
+     /**
+      * @deprecated
+      */
+@@ -26,14 +31,15 @@ public class TickThread extends Thread {
      public static void ensureTickThread(final String reason) {
          if (!isTickThread()) {
              LOGGER.error("Thread failed main thread check: " + reason + ", context=" + getThreadContext(), new Throwable());
@@ -34,7 +48,7 @@ index 69cdd304d255d52c9b7dc9b6a33ffdb630b79abe..d8314bae08146f75442c342275d2e94b
              LOGGER.error(ex, new Throwable());
              throw new IllegalStateException(ex);
          }
-@@ -42,7 +44,7 @@ public class TickThread extends Thread {
+@@ -42,7 +48,7 @@ public class TickThread extends Thread {
      public static void ensureTickThread(final Level world, final BlockPos pos, final int blockRadius, final String reason) {
          if (!isTickThreadFor(world, pos, blockRadius)) {
              final String ex = "Thread failed main thread check: " +
@@ -43,7 +57,7 @@ index 69cdd304d255d52c9b7dc9b6a33ffdb630b79abe..d8314bae08146f75442c342275d2e94b
              LOGGER.error(ex, new Throwable());
              throw new IllegalStateException(ex);
          }
-@@ -51,7 +53,7 @@ public class TickThread extends Thread {
+@@ -51,7 +57,7 @@ public class TickThread extends Thread {
      public static void ensureTickThread(final Level world, final ChunkPos pos, final String reason) {
          if (!isTickThreadFor(world, pos)) {
              final String ex = "Thread failed main thread check: " +
@@ -52,7 +66,7 @@ index 69cdd304d255d52c9b7dc9b6a33ffdb630b79abe..d8314bae08146f75442c342275d2e94b
              LOGGER.error(ex, new Throwable());
              throw new IllegalStateException(ex);
          }
-@@ -60,7 +62,7 @@ public class TickThread extends Thread {
+@@ -60,7 +66,7 @@ public class TickThread extends Thread {
      public static void ensureTickThread(final Level world, final int chunkX, final int chunkZ, final String reason) {
          if (!isTickThreadFor(world, chunkX, chunkZ)) {
              final String ex = "Thread failed main thread check: " +
@@ -61,7 +75,7 @@ index 69cdd304d255d52c9b7dc9b6a33ffdb630b79abe..d8314bae08146f75442c342275d2e94b
              LOGGER.error(ex, new Throwable());
              throw new IllegalStateException(ex);
          }
-@@ -69,7 +71,7 @@ public class TickThread extends Thread {
+@@ -69,7 +75,7 @@ public class TickThread extends Thread {
      public static void ensureTickThread(final Entity entity, final String reason) {
          if (!isTickThreadFor(entity)) {
              final String ex = "Thread failed main thread check: " +
@@ -70,7 +84,7 @@ index 69cdd304d255d52c9b7dc9b6a33ffdb630b79abe..d8314bae08146f75442c342275d2e94b
              LOGGER.error(ex, new Throwable());
              throw new IllegalStateException(ex);
          }
-@@ -78,7 +80,7 @@ public class TickThread extends Thread {
+@@ -78,7 +84,7 @@ public class TickThread extends Thread {
      public static void ensureTickThread(final Level world, final AABB aabb, final String reason) {
          if (!isTickThreadFor(world, aabb)) {
              final String ex = "Thread failed main thread check: " +
@@ -79,7 +93,7 @@ index 69cdd304d255d52c9b7dc9b6a33ffdb630b79abe..d8314bae08146f75442c342275d2e94b
              LOGGER.error(ex, new Throwable());
              throw new IllegalStateException(ex);
          }
-@@ -87,12 +89,74 @@ public class TickThread extends Thread {
+@@ -87,12 +93,74 @@ public class TickThread extends Thread {
      public static void ensureTickThread(final Level world, final double blockX, final double blockZ, final String reason) {
          if (!isTickThreadFor(world, blockX, blockZ)) {
              final String ex = "Thread failed main thread check: " +
@@ -155,7 +169,16 @@ index 69cdd304d255d52c9b7dc9b6a33ffdb630b79abe..d8314bae08146f75442c342275d2e94b
      public final int id; /* We don't override getId as the spec requires that it be unique (with respect to all other threads) */
  
      private static final AtomicInteger ID_GENERATOR = new AtomicInteger();
-@@ -127,7 +191,11 @@ public class TickThread extends Thread {
+@@ -119,7 +187,7 @@ public class TickThread extends Thread {
+     }
+ 
+     public static boolean isTickThread() {
+-        return Thread.currentThread() instanceof TickThread;
++        return Thread.currentThread() instanceof TickThread || MAPPED_THREADS.containsValue(Thread.currentThread());
+     }
+ 
+     public static boolean isShutdownThread() {
+@@ -127,7 +195,11 @@ public class TickThread extends Thread {
      }
  
      public static boolean isTickThreadFor(final Level world, final BlockPos pos) {
@@ -164,11 +187,11 @@ index 69cdd304d255d52c9b7dc9b6a33ffdb630b79abe..d8314bae08146f75442c342275d2e94b
 +
 +        if (currentThread instanceof ServerLevelTickThread serverLevelTickThread) {
 +            return serverLevelTickThread.currentlyTickingServerLevel == world;
-+        } else return currentThread instanceof TickThread;
++        } else return MAPPED_THREADS.get(world) == currentThread || currentThread instanceof TickThread;
      }
  
      public static boolean isTickThreadFor(final Level world, final BlockPos pos, final int blockRadius) {
-@@ -135,38 +203,103 @@ public class TickThread extends Thread {
+@@ -135,38 +207,103 @@ public class TickThread extends Thread {
      }
  
      public static boolean isTickThreadFor(final Level world, final ChunkPos pos) {
@@ -177,7 +200,7 @@ index 69cdd304d255d52c9b7dc9b6a33ffdb630b79abe..d8314bae08146f75442c342275d2e94b
 +
 +        if (currentThread instanceof ServerLevelTickThread serverLevelTickThread) {
 +            return serverLevelTickThread.currentlyTickingServerLevel == world;
-+        } else return currentThread instanceof TickThread;
++        } else return MAPPED_THREADS.get(world) == currentThread || currentThread instanceof TickThread;
      }
  
      public static boolean isTickThreadFor(final Level world, final Vec3 pos) {
@@ -186,7 +209,7 @@ index 69cdd304d255d52c9b7dc9b6a33ffdb630b79abe..d8314bae08146f75442c342275d2e94b
 +
 +        if (currentThread instanceof ServerLevelTickThread serverLevelTickThread) {
 +            return serverLevelTickThread.currentlyTickingServerLevel == world;
-+        } else return currentThread instanceof TickThread;
++        } else return MAPPED_THREADS.get(world) == currentThread || currentThread instanceof TickThread;
      }
  
      public static boolean isTickThreadFor(final Level world, final int chunkX, final int chunkZ) {
@@ -195,7 +218,7 @@ index 69cdd304d255d52c9b7dc9b6a33ffdb630b79abe..d8314bae08146f75442c342275d2e94b
 +
 +        if (currentThread instanceof ServerLevelTickThread serverLevelTickThread) {
 +            return serverLevelTickThread.currentlyTickingServerLevel == world;
-+        } else return currentThread instanceof TickThread;
++        } else return MAPPED_THREADS.get(world) == currentThread || currentThread instanceof TickThread;
      }
  
      public static boolean isTickThreadFor(final Level world, final AABB aabb) {
@@ -204,7 +227,7 @@ index 69cdd304d255d52c9b7dc9b6a33ffdb630b79abe..d8314bae08146f75442c342275d2e94b
 +
 +        if (currentThread instanceof ServerLevelTickThread serverLevelTickThread) {
 +            return serverLevelTickThread.currentlyTickingServerLevel == world;
-+        } else return currentThread instanceof TickThread;
++        } else return MAPPED_THREADS.get(world) == currentThread || currentThread instanceof TickThread;
      }
  
      public static boolean isTickThreadFor(final Level world, final double blockX, final double blockZ) {
@@ -213,7 +236,7 @@ index 69cdd304d255d52c9b7dc9b6a33ffdb630b79abe..d8314bae08146f75442c342275d2e94b
 +
 +        if (currentThread instanceof ServerLevelTickThread serverLevelTickThread) {
 +            return serverLevelTickThread.currentlyTickingServerLevel == world;
-+        } else return currentThread instanceof TickThread;
++        } else return MAPPED_THREADS.get(world) == currentThread || currentThread instanceof TickThread;
      }
  
      public static boolean isTickThreadFor(final Level world, final Vec3 position, final Vec3 deltaMovement, final int buffer) {
@@ -222,7 +245,7 @@ index 69cdd304d255d52c9b7dc9b6a33ffdb630b79abe..d8314bae08146f75442c342275d2e94b
 +
 +        if (currentThread instanceof ServerLevelTickThread serverLevelTickThread) {
 +            return serverLevelTickThread.currentlyTickingServerLevel == world;
-+        } else return currentThread instanceof TickThread;
++        } else return MAPPED_THREADS.get(world) == currentThread || currentThread instanceof TickThread;
      }
  
      public static boolean isTickThreadFor(final Level world, final int fromChunkX, final int fromChunkZ, final int toChunkX, final int toChunkZ) {
@@ -231,7 +254,7 @@ index 69cdd304d255d52c9b7dc9b6a33ffdb630b79abe..d8314bae08146f75442c342275d2e94b
 +
 +        if (currentThread instanceof ServerLevelTickThread serverLevelTickThread) {
 +            return serverLevelTickThread.currentlyTickingServerLevel == world;
-+        } else return currentThread instanceof TickThread;
++        } else return MAPPED_THREADS.get(world) == currentThread || currentThread instanceof TickThread;
      }
  
      public static boolean isTickThreadFor(final Level world, final int chunkX, final int chunkZ, final int radius) {
@@ -240,7 +263,7 @@ index 69cdd304d255d52c9b7dc9b6a33ffdb630b79abe..d8314bae08146f75442c342275d2e94b
 +
 +        if (currentThread instanceof ServerLevelTickThread serverLevelTickThread) {
 +            return serverLevelTickThread.currentlyTickingServerLevel == world;
-+        } else return currentThread instanceof TickThread;
++        } else return MAPPED_THREADS.get(world) == currentThread || currentThread instanceof TickThread;
 +    }
 +
 +    // SparklyPaper - parallel world ticking
@@ -251,7 +274,7 @@ index 69cdd304d255d52c9b7dc9b6a33ffdb630b79abe..d8314bae08146f75442c342275d2e94b
 +
 +        if (currentThread instanceof ServerLevelTickThread serverLevelTickThread) {
 +            return serverLevelTickThread.currentlyTickingServerLevel == world;
-+        } else return currentThread instanceof TickThread;
++        } else return MAPPED_THREADS.get(world) == currentThread || currentThread instanceof TickThread;
      }
  
      public static boolean isTickThreadFor(final Entity entity) {
@@ -264,7 +287,7 @@ index 69cdd304d255d52c9b7dc9b6a33ffdb630b79abe..d8314bae08146f75442c342275d2e94b
 +
 +        if (currentThread instanceof ServerLevelTickThread serverLevelTickThread) {
 +            return serverLevelTickThread.currentlyTickingServerLevel == entity.level();
-+        } else return currentThread instanceof TickThread;
++        } else return MAPPED_THREADS.get(entity.level()) == currentThread || currentThread instanceof TickThread;
 +    }
 +
 +    // SparklyPaper start - parallel world ticking
