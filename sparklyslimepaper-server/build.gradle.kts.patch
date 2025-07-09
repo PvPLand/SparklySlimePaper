@@ -1,6 +1,6 @@
 --- a/aspaper-server/build.gradle.kts
 +++ b/aspaper-server/build.gradle.kts
-@@ -30,7 +_,29 @@
+@@ -35,10 +_,31 @@
          }
      }
  
@@ -30,8 +30,11 @@
 +    activeFork = sparklySlimePaper
  
      spigot {
-         buildDataRef = "3edaf46ec1eed4115ce1b18d2846cded42577e42"
-@@ -116,10 +_,14 @@
+-        enabled = true
+         buildDataRef = "436eac9815c211be1a2a6ca0702615f995e81c44"
+         packageVersion = "v1_21_R5" // also needs to be updated in MappingEnvironment
+     }
+@@ -122,10 +_,14 @@
      main {
          java { srcDir("../paper-server/src/main/java") }
          resources { srcDir("../paper-server/src/main/resources") }
@@ -45,26 +48,25 @@
 +        resources { srcDir("../aspaper-server/src/test/resources") }
      }
  }
- 
-@@ -142,9 +_,15 @@
+ val log4jPlugins = sourceSets.create("log4jPlugins") {
+@@ -151,9 +_,14 @@
      }
  }
  
 +repositories {
-+    maven {
-+        url = uri("https://repo.infernalsuite.com/repository/maven-snapshots/")
-+    }
++    maven { url = uri("https://repo.infernalsuite.com/repository/maven-releases/") }
++    maven { url = uri("https://repo.infernalsuite.com/repository/maven-snapshots/") }
 +}
 +
  dependencies {
 -    implementation(project(":aspaper-api")) //ASP
 -    implementation(project(":core")) //ASP
 +    implementation(project(":sparklyslimepaper-api")) //ASP
-+    implementation("com.infernalsuite.asp:core:4.0.0-SNAPSHOT") //ASP
-     implementation("commons-io:commons-io:2.11.0")
++    implementation("com.infernalsuite.asp:core:4.2.0-SNAPSHOT-" + providers.gradleProperty("aspaperRef").get()) //ASP
      implementation("ca.spottedleaf:concurrentutil:0.0.3")
      implementation("org.jline:jline-terminal-ffm:3.27.1") // use ffm on java 22+
-@@ -215,14 +_,14 @@
+     implementation("org.jline:jline-terminal-jni:3.27.1") // fall back to jni on java 21
+@@ -229,14 +_,14 @@
          val gitBranch = git.exec(providers, "rev-parse", "--abbrev-ref", "HEAD").get().trim()
          attributes(
              "Main-Class" to "org.bukkit.craftbukkit.Main",
