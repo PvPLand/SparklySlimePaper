@@ -33,7 +33,7 @@ jobs:
         run: ./gradlew createMojmapPaperclipJar
 
       - name: Create Release (development)
-        if: github.ref != 'refs/heads/master'
+        if: contains(github.ref, 'dev')
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
@@ -44,7 +44,7 @@ jobs:
             sparklyslimepaper-server/build/libs/*-paperclip-1.21.7-R0.1-SNAPSHOT-mojmap.jar
 
       - name: Create Release (master)
-        if: github.ref == 'refs/heads/master'
+        if: !contains(github.ref, 'dev')
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
