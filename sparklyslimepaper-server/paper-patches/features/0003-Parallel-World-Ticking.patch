@@ -366,13 +366,12 @@ index 0000000000000000000000000000000000000000..1f1c80af81603fcf03c16d6820b49350
 +
 +    @Override
 +    public Thread newThread(Runnable r) {
-+        // Append a unique counter to the base name
 +        String name = "Server Level Thread " + counter.getAndIncrement();
 +
 +        TickThread.ServerLevelTickThread tickThread = new TickThread.ServerLevelTickThread(r, name);
 +
-+        tickThread.setDaemon(false); // ensure it's not daemon
-+        tickThread.setPriority(Thread.MAX_PRIORITY); // match original priority
++        tickThread.setDaemon(false);
++        tickThread.setPriority(Thread.MAX_PRIORITY);
 +
 +        return tickThread;
 +    }
@@ -617,7 +616,7 @@ index 6809f9dcf8510c714145d99d250eb69f98d9bf27..e51d306fafad0591562ee3b7da56889d
          this.getNMS().tick(level, this.position, level.random);
      }
 @@ -737,6 +802,11 @@ public class CraftBlock implements Block {
- 
+
      @Override
      public void fluidTick() {
 +        // SparklyPaper start - parallel world ticking
@@ -627,7 +626,7 @@ index 6809f9dcf8510c714145d99d250eb69f98d9bf27..e51d306fafad0591562ee3b7da56889d
 +        // SparklyPaper end - parallel world ticking
          this.getNMSFluid().tick(this.world.getMinecraftWorld(), this.position, this.getNMS());
      }
- 
+
 diff --git a/src/main/java/org/bukkit/craftbukkit/block/CraftBlockEntityState.java b/src/main/java/org/bukkit/craftbukkit/block/CraftBlockEntityState.java
 index 5d4faad9df4824cfd61abfd4df011c006f114424..d1227c670db2dbe1816d78be51796c43e99a4d9b 100644
 --- a/src/main/java/org/bukkit/craftbukkit/block/CraftBlockEntityState.java
