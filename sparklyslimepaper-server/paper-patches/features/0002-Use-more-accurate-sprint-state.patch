@@ -5,10 +5,10 @@ Subject: [PATCH] Use more accurate sprint state
 
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-index 9d6235390c530b4f3780ac8d088ad8f6ee3db58e..a4da060fa9ebb48ae345e41c24b677e2f178d50a 100644
+index 322a1e38799a7bf45b8d3ee151b0b62df45d55d7..2eefbe0a9a816bacf3ff2422e20ca81a0459aa8f 100644
 --- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-@@ -1577,7 +1577,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player, PluginMessa
+@@ -1472,7 +1472,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player, PluginMessa
  
      @Override
      public boolean isSprinting() {
