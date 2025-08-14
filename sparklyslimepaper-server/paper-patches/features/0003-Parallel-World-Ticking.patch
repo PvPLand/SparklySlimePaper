@@ -349,32 +349,35 @@ index 8b5293b0c696ef21d0101493ffa41b60bf0bc86b..6ba713606dafbf5ec19d22b10170571e
  
 diff --git a/src/main/java/net/sparklypower/sparklypaper/ServerLevelTickExecutorThreadFactory.java b/src/main/java/net/sparklypower/sparklypaper/ServerLevelTickExecutorThreadFactory.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..d26d82cb4d120083efc424092a324e5e70122105
+index 0000000000000000000000000000000000000000..1f1c80af81603fcf03c16d6820b49350616bdbb1
 --- /dev/null
 +++ b/src/main/java/net/sparklypower/sparklypaper/ServerLevelTickExecutorThreadFactory.java
-@@ -0,0 +1,22 @@
+@@ -0,0 +1,24 @@
 +package net.sparklypower.sparklypaper;
 +
 +import ca.spottedleaf.moonrise.common.util.TickThread;
 +
 +import java.util.concurrent.ThreadFactory;
++import java.util.concurrent.atomic.AtomicInteger;
 +
 +public class ServerLevelTickExecutorThreadFactory implements ThreadFactory {
++
++    private final AtomicInteger counter = new AtomicInteger();
++
 +    @Override
 +    public Thread newThread(Runnable r) {
-+        TickThread.ServerLevelTickThread tickThread = new TickThread.ServerLevelTickThread(r, "serverlevel-tick-worker");
++        // Append a unique counter to the base name
++        String name = "Server Level Thread " + counter.getAndIncrement();
 +
-+        if (tickThread.isDaemon()) {
-+            tickThread.setDaemon(false);
-+        }
++        TickThread.ServerLevelTickThread tickThread = new TickThread.ServerLevelTickThread(r, name);
 +
-+        if (tickThread.getPriority() != Thread.MAX_PRIORITY) {
-+            tickThread.setPriority(Thread.MAX_PRIORITY);
-+        }
++        tickThread.setDaemon(false); // ensure it's not daemon
++        tickThread.setPriority(Thread.MAX_PRIORITY); // match original priority
 +
 +        return tickThread;
 +    }
 +}
+\ No newline at end of file
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 index aa0a61d7f3128543b698647663fa4a9af2a8255a..0faa70d74dee3dd093b77de48dfb6c3564ff3578 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
