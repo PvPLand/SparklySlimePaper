@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/EntityType.java
++++ b/net/minecraft/world/entity/EntityType.java
+@@ -1063,7 +_,7 @@
+             .eyeHeight(1.62F)
+             .vehicleAttachment(Player.DEFAULT_VEHICLE_ATTACHMENT)
+             .clientTrackingRange(32)
+-            .updateInterval(2)
++            .updateInterval(1)
+     );
+     public static final EntityType<FishingHook> FISHING_BOBBER = register(
+         "fishing_bobber",
