@@ -1,0 +1,139 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: jtjava <madcapsnow25@gmail.com>
+Date: Wed, 20 Aug 2025 02:18:13 -0500
+Subject: [PATCH] Parallel connection ticking
+
+
+diff --git a/net/minecraft/server/MinecraftServer.java b/net/minecraft/server/MinecraftServer.java
+index e2aca7fb8bf078e37f564d39cfb2061d0052e9c9..98d3b918fd403caecb3c5cf7f300661a261e0225 100644
+--- a/net/minecraft/server/MinecraftServer.java
++++ b/net/minecraft/server/MinecraftServer.java
+@@ -1670,7 +1670,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+     }
+ 
+     public final io.papermc.paper.threadedregions.EntityScheduler.EntitySchedulerTickList entitySchedulerTickList = new io.papermc.paper.threadedregions.EntityScheduler.EntitySchedulerTickList(); // Paper - optimise Folia entity scheduler
+-    ExecutorService levelThreadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), new ServerLevelTickExecutorThreadFactory());
++    public ExecutorService levelThreadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), new ServerLevelTickExecutorThreadFactory());
+     protected void tickChildren(BooleanSupplier hasTimeLeft) {
+         ProfilerFiller profilerFiller = Profiler.get();
+         this.getPlayerList().getPlayers().forEach(serverPlayer1 -> serverPlayer1.connection.suspendFlushing());
+diff --git a/net/minecraft/server/network/ServerConnectionListener.java b/net/minecraft/server/network/ServerConnectionListener.java
+index bd07e6a5aa1883786d789ea71711a0c0c0a95c26..3b378e1ceabf247b4ba4100ea9256bf721038cc6 100644
+--- a/net/minecraft/server/network/ServerConnectionListener.java
++++ b/net/minecraft/server/network/ServerConnectionListener.java
+@@ -30,13 +30,17 @@ import java.io.IOException;
+ import java.net.InetAddress;
+ import java.net.SocketAddress;
+ import java.util.Collections;
++import java.util.HashMap;
+ import java.util.Iterator;
+ import java.util.List;
++import java.util.Map;
++import java.util.concurrent.ExecutionException;
+ import java.util.concurrent.TimeUnit;
+ import java.util.function.Supplier;
+ import javax.annotation.Nullable;
+ import net.minecraft.CrashReport;
+ import net.minecraft.ReportedException;
++import net.minecraft.Util;
+ import net.minecraft.network.Connection;
+ import net.minecraft.network.PacketSendListener;
+ import net.minecraft.network.RateKickingConnection;
+@@ -44,7 +48,10 @@ import net.minecraft.network.chat.Component;
+ import net.minecraft.network.protocol.PacketFlow;
+ import net.minecraft.network.protocol.common.ClientboundDisconnectPacket;
+ import net.minecraft.server.MinecraftServer;
++import net.minecraft.server.level.ServerLevel;
++import net.minecraft.server.level.ServerPlayer;
+ import org.slf4j.Logger;
++import java.util.ArrayList;
+ 
+ public class ServerConnectionListener {
+     private static final Logger LOGGER = LogUtils.getLogger();
+@@ -248,21 +255,19 @@ public class ServerConnectionListener {
+             // Spigot end
+             Iterator<Connection> iterator = this.connections.iterator();
+ 
++            // Group connections by world
++            Map<ServerLevel, List<Connection>> connectionsByWorld = new HashMap<>();
++
+             while (iterator.hasNext()) {
+                 Connection connection = iterator.next();
+                 if (!connection.isConnecting()) {
+                     if (connection.isConnected()) {
+-                        try {
+-                            connection.tick();
+-                        } catch (Exception var7) {
+-                            if (connection.isMemoryConnection()) {
+-                                throw new ReportedException(CrashReport.forThrowable(var7, "Ticking memory connection"));
+-                            }
+-
+-                            LOGGER.warn("Failed to handle packet for {}", connection.getLoggableAddress(this.server.logIPs()), var7);
+-                            Component component = Component.literal("Internal server error");
+-                            connection.send(new ClientboundDisconnectPacket(component), PacketSendListener.thenRun(() -> connection.disconnect(component)));
+-                            connection.setReadOnly();
++                        ServerPlayer player = connection.getPlayer();
++                        if (player != null && player.level() != null) {
++                            connectionsByWorld.computeIfAbsent(player.level(), k -> new ArrayList<>())
++                                    .add(connection);
++                        } else {
++                            this.tickConnection(connection);
+                         }
+                     } else {
+                         if (connection.preparing) continue; // Spigot - Fix a race condition where a NetworkManager could be unregistered just before connection
+@@ -271,6 +276,48 @@ public class ServerConnectionListener {
+                     }
+                 }
+             }
++
++            // Submit one task per world
++            java.util.ArrayDeque<java.util.concurrent.Future<Void>> worldTasks = new java.util.ArrayDeque<>();
++            for (Map.Entry<ServerLevel, List<Connection>> entry : connectionsByWorld.entrySet()) {
++                ServerLevel world = entry.getKey();
++                List<Connection> worldConnections = entry.getValue();
++
++                worldTasks.add(MinecraftServer.getServer().levelThreadPool.submit(() -> {
++                    ca.spottedleaf.moonrise.common.util.TickThread.ServerLevelTickThread currentThread =
++                            (ca.spottedleaf.moonrise.common.util.TickThread.ServerLevelTickThread) Thread.currentThread();
++                    currentThread.currentlyTickingServerLevel = world;
++
++                    for (Connection connection : worldConnections) {
++                        this.tickConnection(connection);
++                    }
++                    return null;
++                }));
++            }
++
++            // Wait for completion
++            while (!worldTasks.isEmpty()) {
++                try {
++                    worldTasks.pop().get();
++                } catch (InterruptedException | ExecutionException e) {
++                    throw new RuntimeException(e);
++                }
++            }
++        }
++    }
++
++    private void tickConnection(Connection connection) {
++        try {
++            connection.tick();
++        } catch (Exception var7) {
++            if (connection.isMemoryConnection()) {
++                throw new ReportedException(CrashReport.forThrowable(var7, "Ticking memory connection"));
++            }
++
++            LOGGER.warn("Failed to handle packet for {}", connection.getLoggableAddress(this.server.logIPs()), var7);
++            Component component = Component.literal("Internal server error");
++            connection.send(new ClientboundDisconnectPacket(component), PacketSendListener.thenRun(() -> connection.disconnect(component)));
++            connection.setReadOnly();
+         }
+     }
+ 
+@@ -319,4 +366,4 @@ public class ServerConnectionListener {
+             }
+         }
+     }
+-}
++}
+\ No newline at end of file
